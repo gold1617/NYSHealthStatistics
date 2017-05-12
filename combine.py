@@ -6,7 +6,7 @@ def add(data,county,stat):
         if d[0].lower() == county.lower():
             d.append(stat)
 
-header = ('County','Heart Attack Hospitalization per 10000','Percentage of Obese Adults','Percentage of Adults who smoke','Percentage of Adults Binge Drinking','Hospitalization for Short-Term complications of Diabetes per 10000','Percentage of Obese Students')
+header = ('County','Heart Attack Hospitalization per 10000','Percentage of Obese Adults','Percentage of Adults who smoke','Percentage of Adults Binge Drinking','Hospitalization for Short-Term complications of Diabetes per 10000','Percentage of Obese Students','Unemployment Percentage')
 data = []
 
 inp = open('PA__Age-adjusted_Heart_Attack_Hospitalization_Rate_per_10_000_Map.csv')
@@ -60,7 +60,7 @@ try:
 
     inp.close()
 
-    inp = open('Student_Weight_Status_Category_Reporting_Results__Beginning_2010.csv');
+    inp = open('PA_Student_Weight_Status_Category_Reporting_Results__Beginning_2010.csv');
     reader = csv.reader(inp)
 
     for i,line in enumerate(reader):
@@ -68,12 +68,32 @@ try:
             if(line[4]=='2010-2012' and line[11]=='DISTRICT TOTAL' and line[12]=='COUNTY'):
                 add(data,line[1],line[8][:-1])
 
+    for d in data:
+        if(len(d) < 7):
+            d.append('-1')
+
+    inp.close()
+
+    inp = open('Local_Area_Unemployment_Statistics__Beginning_1976.csv')
+    reader = csv.reader(inp) 
+
+    totals = {}
+    for i,line in enumerate(reader):
+        if i != 0:
+           year = int(line[1])
+           if year >= 2010 and  year <= 2012:
+               if totals.has_key(line[0]):
+                   totals[line[0]] = totals[line[0]] + float(line[6][:-1])
+               else:
+                   totals[line[0]] = float(line[6][:-1])
+
+    for key in totals.keys():
+        add(data,key.rsplit(' ',1)[0],totals[key]/36)
+
     writer.writerow(header)
 
     for d in data:
-        if(len(d) <7):
-            d.append('-1')
-        writer.writerow((d[0],float(d[1]),float(d[2]),float(d[3]),float(d[4]),float(d[5]),float(d[6])))
+        writer.writerow((d[0],float(d[1]),float(d[2]),float(d[3]),float(d[4]),float(d[5]),float(d[6]),d[7]))
         
 finally:
     inp.close()
